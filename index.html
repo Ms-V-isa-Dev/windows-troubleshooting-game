@@ -47,25 +47,132 @@
             opacity: 0.9;
         }
 
-        .score-board {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .score {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.5rem;
-            font-weight: bold;
+        .team-setup {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
             backdrop-filter: blur(10px);
             border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .team-mode-btn {
+            background: linear-gradient(145deg, #4a90e2, #357abd);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .team-mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .team-mode-btn.selected {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+        }
+
+        .team-inputs {
+            margin-top: 20px;
+        }
+
+        .team-input-group {
+            margin: 15px 0;
+        }
+
+        .team-input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .team-input-group input {
+            padding: 12px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            width: 250px;
+            backdrop-filter: blur(5px);
+        }
+
+        .team-input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .team-input-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .start-game-btn {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            margin-top: 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .start-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .team-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            min-width: 200px;
+        }
+
+        .team-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .current-turn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #FF6B6B, #ee5a5a);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            animation: pulse 2s ease-in-out infinite;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .game-board {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(11, auto);
             gap: 15px;
             margin-bottom: 30px;
             min-width: 800px;
@@ -233,21 +340,60 @@
                 font-size: 1.5rem;
                 padding: 20px;
             }
+
+            .score-board {
+                flex-direction: column;
+                gap: 15px;
+                align-items: center;
+            }
+
+            .team-input-group input {
+                width: 200px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="game-container">
         <div class="header">
-            <h1>🖥️ Windows Troubleshooting Jeopardy! 🔧</h1>
-            <p class="subtitle">Test your Windows system knowledge and troubleshooting skills!</p>
+            <h1>🖥️ Windows & IT Certification Jeopardy! 🏆</h1>
+            <p class="subtitle">Test your Windows system knowledge and IT certification skills!</p>
         </div>
 
-        <div class="score-board">
-            <div class="score">Score: $<span id="score">0</span></div>
+        <div class="team-setup" id="teamSetup">
+            <h2 style="text-align: center; margin-bottom: 20px;">Game Setup</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="team-mode-btn" onclick="setTeamMode(1)">Single Team</button>
+                <button class="team-mode-btn" onclick="setTeamMode(2)">Two Teams</button>
+            </div>
+            <div class="team-inputs" id="teamInputs" style="display: none;">
+                <div class="team-input-group">
+                    <label for="team1Name">Team 1 Name:</label>
+                    <input type="text" id="team1Name" placeholder="Enter team 1 name" maxlength="20">
+                </div>
+                <div class="team-input-group" id="team2Input" style="display: none;">
+                    <label for="team2Name">Team 2 Name:</label>
+                    <input type="text" id="team2Name" placeholder="Enter team 2 name" maxlength="20">
+                </div>
+                <button class="start-game-btn" onclick="startGame()">Start Game</button>
+            </div>
         </div>
 
-        <div class="game-board" id="gameBoard">
+        <div class="score-board" id="scoreBoard" style="display: none;">
+            <div class="team-score" id="team1Score">
+                <span class="team-name" id="team1DisplayName">Team 1</span>
+                <div class="score">$<span id="score1">0</span></div>
+            </div>
+            <div class="current-turn" id="currentTurn" style="display: none;">
+                <span id="turnIndicator">Team 1's Turn</span>
+            </div>
+            <div class="team-score" id="team2Score" style="display: none;">
+                <span class="team-name" id="team2DisplayName">Team 2</span>
+                <div class="score">$<span id="score2">0</span></div>
+            </div>
+        </div>
+
+        <div class="game-board" id="gameBoard" style="display: none;">
             <!-- Categories -->
             <div class="category">Windows Basics</div>
             <div class="category">Hardware Issues</div>
@@ -289,6 +435,48 @@
             <div class="question-tile" data-category="software" data-points="500">$500</div>
             <div class="question-tile" data-category="network" data-points="500">$500</div>
             <div class="question-tile" data-category="tools" data-points="500">$500</div>
+
+            <!-- CERTIFICATION LEVEL CATEGORIES -->
+            <div class="category">CompTIA A+</div>
+            <div class="category">Windows Admin</div>
+            <div class="category">Network+</div>
+            <div class="category">Security</div>
+            <div class="category">Advanced Tech</div>
+
+            <!-- Certification $100 Questions -->
+            <div class="question-tile" data-category="comptia" data-points="100">$100</div>
+            <div class="question-tile" data-category="winadmin" data-points="100">$100</div>
+            <div class="question-tile" data-category="networkplus" data-points="100">$100</div>
+            <div class="question-tile" data-category="security" data-points="100">$100</div>
+            <div class="question-tile" data-category="advanced" data-points="100">$100</div>
+
+            <!-- Certification $200 Questions -->
+            <div class="question-tile" data-category="comptia" data-points="200">$200</div>
+            <div class="question-tile" data-category="winadmin" data-points="200">$200</div>
+            <div class="question-tile" data-category="networkplus" data-points="200">$200</div>
+            <div class="question-tile" data-category="security" data-points="200">$200</div>
+            <div class="question-tile" data-category="advanced" data-points="200">$200</div>
+
+            <!-- Certification $300 Questions -->
+            <div class="question-tile" data-category="comptia" data-points="300">$300</div>
+            <div class="question-tile" data-category="winadmin" data-points="300">$300</div>
+            <div class="question-tile" data-category="networkplus" data-points="300">$300</div>
+            <div class="question-tile" data-category="security" data-points="300">$300</div>
+            <div class="question-tile" data-category="advanced" data-points="300">$300</div>
+
+            <!-- Certification $400 Questions -->
+            <div class="question-tile" data-category="comptia" data-points="400">$400</div>
+            <div class="question-tile" data-category="winadmin" data-points="400">$400</div>
+            <div class="question-tile" data-category="networkplus" data-points="400">$400</div>
+            <div class="question-tile" data-category="security" data-points="400">$400</div>
+            <div class="question-tile" data-category="advanced" data-points="400">$400</div>
+
+            <!-- Certification $500 Questions -->
+            <div class="question-tile" data-category="comptia" data-points="500">$500</div>
+            <div class="question-tile" data-category="winadmin" data-points="500">$500</div>
+            <div class="question-tile" data-category="networkplus" data-points="500">$500</div>
+            <div class="question-tile" data-category="security" data-points="500">$500</div>
+            <div class="question-tile" data-category="advanced" data-points="500">$500</div>
         </div>
 
         <div class="final-score" id="finalScore" style="display: none;">
@@ -311,7 +499,7 @@
     <script>
         let score = 0;
         let questionsAnswered = 0;
-        const totalQuestions = 25;
+        const totalQuestions = 50;
 
         const questions = {
             basics: {
@@ -448,6 +636,141 @@
                     answers: ["Same function, different name", "PowerShell is more powerful with object-based commands", "PowerShell is only for servers", "PowerShell is being discontinued"],
                     correct: 1
                 }
+            },
+            comptia: {
+                100: {
+                    question: "What is the maximum cable length for USB 2.0?",
+                    answers: ["3 meters", "5 meters", "10 meters", "15 meters"],
+                    correct: 1
+                },
+                200: {
+                    question: "Which RAID level provides fault tolerance with minimum 2 drives?",
+                    answers: ["RAID 0", "RAID 1", "RAID 5", "RAID 10"],
+                    correct: 1
+                },
+                300: {
+                    question: "What does ECC stand for in computer memory?",
+                    answers: ["Extended Cache Control", "Error Correcting Code", "Enhanced CPU Cache", "External Component Connector"],
+                    correct: 1
+                },
+                400: {
+                    question: "What is the standard voltage for DDR4 RAM?",
+                    answers: ["1.2V", "1.35V", "1.5V", "3.3V"],
+                    correct: 0
+                },
+                500: {
+                    question: "Which chipset component connects directly to the CPU in modern systems?",
+                    answers: ["Southbridge", "Northbridge", "Platform Controller Hub (PCH)", "I/O Controller Hub"],
+                    correct: 2
+                }
+            },
+            winadmin: {
+                100: {
+                    question: "What command creates a new Active Directory user in PowerShell?",
+                    answers: ["New-User", "Add-ADUser", "New-ADUser", "Create-User"],
+                    correct: 2
+                },
+                200: {
+                    question: "Which Windows Server role provides centralized authentication?",
+                    answers: ["DNS Server", "Active Directory Domain Services", "DHCP Server", "File Services"],
+                    correct: 1
+                },
+                300: {
+                    question: "What is the default port for Remote Desktop Protocol (RDP)?",
+                    answers: ["3389", "5900", "22", "80"],
+                    correct: 0
+                },
+                400: {
+                    question: "Which Group Policy setting controls password complexity requirements?",
+                    answers: ["Account Policies > Password Policy", "Local Policies > Security Options", "Account Policies > Account Lockout Policy", "Local Policies > User Rights Assignment"],
+                    correct: 0
+                },
+                500: {
+                    question: "What does SYSVOL contain in Active Directory?",
+                    answers: ["User profiles", "Group Policy templates and logon scripts", "System logs", "Application data"],
+                    correct: 1
+                }
+            },
+            networkplus: {
+                100: {
+                    question: "Which OSI layer does a router operate at?",
+                    answers: ["Layer 2 (Data Link)", "Layer 3 (Network)", "Layer 4 (Transport)", "Layer 7 (Application)"],
+                    correct: 1
+                },
+                200: {
+                    question: "What is the subnet mask for a /24 network?",
+                    answers: ["255.0.0.0", "255.255.0.0", "255.255.255.0", "255.255.255.255"],
+                    correct: 2
+                },
+                300: {
+                    question: "Which protocol is used for automatic IP address assignment?",
+                    answers: ["DNS", "DHCP", "ARP", "ICMP"],
+                    correct: 1
+                },
+                400: {
+                    question: "What is the maximum transmission distance for Cat6 cable?",
+                    answers: ["100 meters", "185 meters", "500 meters", "1000 meters"],
+                    correct: 0
+                },
+                500: {
+                    question: "Which VLAN ID is reserved and cannot be used for user traffic?",
+                    answers: ["VLAN 1", "VLAN 1002", "VLAN 4095", "All of the above"],
+                    correct: 3
+                }
+            },
+            security: {
+                100: {
+                    question: "What type of attack involves overwhelming a system with traffic?",
+                    answers: ["Phishing", "DDoS", "Man-in-the-middle", "SQL Injection"],
+                    correct: 1
+                },
+                200: {
+                    question: "Which encryption standard replaced WEP for wireless networks?",
+                    answers: ["WPA", "WPA2", "WPA3", "All of the above"],
+                    correct: 3
+                },
+                300: {
+                    question: "What does MFA stand for in security?",
+                    answers: ["Multiple Factor Authentication", "Multi-Factor Authentication", "Managed Factor Access", "Master File Authentication"],
+                    correct: 1
+                },
+                400: {
+                    question: "Which hash algorithm is considered cryptographically broken?",
+                    answers: ["SHA-1", "SHA-256", "SHA-3", "MD5"],
+                    correct: 3
+                },
+                500: {
+                    question: "What is the principle of least privilege?",
+                    answers: ["Users get maximum permissions", "Users get only minimum required permissions", "All users have same permissions", "Permissions are inherited automatically"],
+                    correct: 1
+                }
+            },
+            advanced: {
+                100: {
+                    question: "What does API stand for?",
+                    answers: ["Application Programming Interface", "Advanced Program Integration", "Automated Process Instruction", "Application Process Interface"],
+                    correct: 0
+                },
+                200: {
+                    question: "Which Windows feature allows running multiple operating systems?",
+                    answers: ["Virtual Memory", "Hyper-V", "Windows Subsystem", "Container Support"],
+                    correct: 1
+                },
+                300: {
+                    question: "What is the difference between TCP and UDP?",
+                    answers: ["TCP is faster than UDP", "UDP is connection-oriented, TCP is connectionless", "TCP is reliable, UDP is unreliable but faster", "No difference"],
+                    correct: 2
+                },
+                400: {
+                    question: "Which PowerShell cmdlet retrieves system information?",
+                    answers: ["Get-SystemInfo", "Get-ComputerInfo", "Get-WmiObject", "Both B and C"],
+                    correct: 3
+                },
+                500: {
+                    question: "What does CI/CD stand for in DevOps?",
+                    answers: ["Code Integration/Code Deployment", "Continuous Integration/Continuous Deployment", "Central Integration/Central Distribution", "Computer Integration/Computer Deployment"],
+                    correct: 1
+                }
             }
         };
 
@@ -455,7 +778,14 @@
             const question = questions[category][points];
             if (!question) return;
 
-            document.getElementById('modalCategory').textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            // Format category name for display
+            let displayCategory = category.charAt(0).toUpperCase() + category.slice(1);
+            if (category === 'comptia') displayCategory = 'CompTIA A+';
+            if (category === 'winadmin') displayCategory = 'Windows Admin';
+            if (category === 'networkplus') displayCategory = 'Network+';
+            if (category === 'advanced') displayCategory = 'Advanced Tech';
+
+            document.getElementById('modalCategory').textContent = displayCategory;
             document.getElementById('modalPoints').textContent = `$${points}`;
             document.getElementById('questionText').textContent = question.question;
             
