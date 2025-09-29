@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Troubleshooting Jeopardy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #fff, 0 0 30px #667eea; }
+            to { text-shadow: 0 0 30px #fff, 0 0 40px #764ba2; }
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .score {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            min-width: 800px;
+        }
+
+        .category {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .question-tile {
+            background: linear-gradient(145deg, #4a90e2, #357abd);
+            border: 3px solid #2c5aa0;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question-tile:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(145deg, #5ba0f2, #4680cd);
+        }
+
+        .question-tile.answered {
+            background: linear-gradient(145deg, #666, #444);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .question-tile.answered:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .answers {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .answer-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .answer-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            border-color: #4CAF50;
+        }
+
+        .answer-btn.incorrect {
+            background: linear-gradient(145deg, #f44336, #da190b);
+            border-color: #f44336;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .final-score {
+            text-align: center;
+            margin-top: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .celebration {
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: repeat(2, 1fr);
+                min-width: auto;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .question-tile {
+                font-size: 1.5rem;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🖥️ Windows Troubleshooting Jeopardy! 🔧</h1>
+            <p class="subtitle">Test your Windows system knowledge and troubleshooting skills!</p>
+        </div>
+
+        <div class="score-board">
+            <div class="score">Score: $<span id="score">0</span></div>
+        </div>
+
+        <div class="game-board" id="gameBoard">
+            <!-- Categories -->
+            <div class="category">Windows Basics</div>
+            <div class="category">Hardware Issues</div>
+            <div class="category">Software Problems</div>
+            <div class="category">Network Troubles</div>
+            <div class="category">System Tools</div>
+
+            <!-- $100 Questions -->
+            <div class="question-tile" data-category="basics" data-points="100">$100</div>
+            <div class="question-tile" data-category="hardware" data-points="100">$100</div>
+            <div class="question-tile" data-category="software" data-points="100">$100</div>
+            <div class="question-tile" data-category="network" data-points="100">$100</div>
+            <div class="question-tile" data-category="tools" data-points="100">$100</div>
+
+            <!-- $200 Questions -->
+            <div class="question-tile" data-category="basics" data-points="200">$200</div>
+            <div class="question-tile" data-category="hardware" data-points="200">$200</div>
+            <div class="question-tile" data-category="software" data-points="200">$200</div>
+            <div class="question-tile" data-category="network" data-points="200">$200</div>
+            <div class="question-tile" data-category="tools" data-points="200">$200</div>
+
+            <!-- $300 Questions -->
+            <div class="question-tile" data-category="basics" data-points="300">$300</div>
+            <div class="question-tile" data-category="hardware" data-points="300">$300</div>
+            <div class="question-tile" data-category="software" data-points="300">$300</div>
+            <div class="question-tile" data-category="network" data-points="300">$300</div>
+            <div class="question-tile" data-category="tools" data-points="300">$300</div>
+
+            <!-- $400 Questions -->
+            <div class="question-tile" data-category="basics" data-points="400">$400</div>
+            <div class="question-tile" data-category="hardware" data-points="400">$400</div>
+            <div class="question-tile" data-category="software" data-points="400">$400</div>
+            <div class="question-tile" data-category="network" data-points="400">$400</div>
+            <div class="question-tile" data-category="tools" data-points="400">$400</div>
+
+            <!-- $500 Questions -->
+            <div class="question-tile" data-category="basics" data-points="500">$500</div>
+            <div class="question-tile" data-category="hardware" data-points="500">$500</div>
+            <div class="question-tile" data-category="software" data-points="500">$500</div>
+            <div class="question-tile" data-category="network" data-points="500">$500</div>
+            <div class="question-tile" data-category="tools" data-points="500">$500</div>
+        </div>
+
+        <div class="final-score" id="finalScore" style="display: none;">
+            <h2 class="celebration">🎉 Game Complete! 🎉</h2>
+            <p style="font-size: 1.5rem; margin-top: 20px;">Your Final Score: $<span id="finalScoreValue">0</span></p>
+            <p style="margin-top: 15px; opacity: 0.9;">Thanks for testing your Windows troubleshooting skills!</p>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3 id="modalCategory" style="margin-bottom: 10px; opacity: 0.8;"></h3>
+            <h2 id="modalPoints" style="margin-bottom: 20px; color: #4CAF50;"></h2>
+            <p class="question-text" id="questionText"></p>
+            <div class="answers" id="answers"></div>
+            <button class="close-btn" onclick="closeModal()">Continue Game</button>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let questionsAnswered = 0;
+        const totalQuestions = 25;
+
+        const questions = {
+            basics: {
+                100: {
+                    question: "What keyboard shortcut opens the Task Manager in Windows?",
+                    answers: ["Ctrl + Alt + Delete", "Ctrl + Shift + Esc", "Alt + Tab", "Windows + R"],
+                    correct: 1
+                },
+                200: {
+                    question: "What does BSOD stand for?",
+                    answers: ["Basic System Operating Device", "Blue Screen of Death", "Boot System Operational Display", "Binary System Output Data"],
+                    correct: 1
+                },
+                300: {
+                    question: "Which Windows feature allows you to go back to a previous system state?",
+                    answers: ["System Backup", "System Restore", "System Recovery", "System Reset"],
+                    correct: 1
+                },
+                400: {
+                    question: "What is the default file system for Windows 10/11?",
+                    answers: ["FAT32", "exFAT", "NTFS", "ReFS"],
+                    correct: 2
+                },
+                500: {
+                    question: "What does the Windows Registry primarily store?",
+                    answers: ["User files", "System configuration data", "Temporary files", "Application data only"],
+                    correct: 1
+                }
+            },
+            hardware: {
+                100: {
+                    question: "If your computer won't turn on, what's the first thing to check?",
+                    answers: ["RAM", "Hard drive", "Power connection", "Graphics card"],
+                    correct: 2
+                },
+                200: {
+                    question: "What does POST stand for in computer boot process?",
+                    answers: ["Power On Self Test", "Program Operation System Test", "Primary Operating System Tool", "Processing Order Setup Test"],
+                    correct: 0
+                },
+                300: {
+                    question: "Which Windows tool helps identify hardware problems?",
+                    answers: ["Control Panel", "Device Manager", "System Information", "Performance Monitor"],
+                    correct: 1
+                },
+                400: {
+                    question: "What does a continuous beep during startup usually indicate?",
+                    answers: ["Hard drive failure", "RAM problem", "CPU overheating", "Graphics card issue"],
+                    correct: 1
+                },
+                500: {
+                    question: "What temperature range is considered safe for most CPUs?",
+                    answers: ["20-40°C", "40-70°C", "70-90°C", "90-110°C"],
+                    correct: 1
+                }
+            },
+            software: {
+                100: {
+                    question: "What should you try first when a program stops responding?",
+                    answers: ["Restart computer", "End task in Task Manager", "Reinstall the program", "Run antivirus scan"],
+                    correct: 1
+                },
+                200: {
+                    question: "What does 'compatibility mode' do in Windows?",
+                    answers: ["Makes programs run faster", "Runs older programs on newer Windows", "Fixes program crashes", "Updates program automatically"],
+                    correct: 1
+                },
+                300: {
+                    question: "Which Windows feature helps fix corrupted system files?",
+                    answers: ["CHKDSK", "SFC /scannow", "DISM", "All of the above"],
+                    correct: 3
+                },
+                400: {
+                    question: "What's the difference between a driver and firmware?",
+                    answers: ["No difference", "Drivers are software, firmware is hardware-level code", "Firmware is newer", "Drivers are for printers only"],
+                    correct: 1
+                },
+                500: {
+                    question: "What does 'DLL Hell' refer to in Windows?",
+                    answers: ["Virus infection", "Hard drive corruption", "Conflicting Dynamic Link Library files", "Network problems"],
+                    correct: 2
+                }
+            },
+            network: {
+                100: {
+                    question: "What command tests network connectivity to a website?",
+                    answers: ["ipconfig", "ping", "netstat", "tracert"],
+                    correct: 1
+                },
+                200: {
+                    question: "What does 'Limited connectivity' usually mean?",
+                    answers: ["Slow internet", "Connected to network but no internet", "Weak WiFi signal", "Router is broken"],
+                    correct: 1
+                },
+                300: {
+                    question: "Which IP address range is typically used for home networks?",
+                    answers: ["192.168.x.x", "10.0.x.x", "172.16.x.x", "All of the above"],
+                    correct: 3
+                },
+                400: {
+                    question: "What does DNS stand for and what does it do?",
+                    answers: ["Data Network System - manages files", "Domain Name System - translates web addresses", "Digital Network Security - protects connections", "Dynamic Network Setup - configures internet"],
+                    correct: 1
+                },
+                500: {
+                    question: "What port does HTTPS typically use?",
+                    answers: ["80", "443", "21", "25"],
+                    correct: 1
+                }
+            },
+            tools: {
+                100: {
+                    question: "How do you open the Command Prompt as administrator?",
+                    answers: ["Type 'cmd' in Start menu", "Right-click Start button, select 'Command Prompt (Admin)'", "Press Windows + X, select 'Command Prompt (Admin)'", "Both B and C"],
+                    correct: 3
+                },
+                200: {
+                    question: "What does 'msconfig' open?",
+                    answers: ["Microsoft Configuration", "System Configuration utility", "MS Office Config", "Mouse Settings Config"],
+                    correct: 1
+                },
+                300: {
+                    question: "Which tool shows detailed system information in Windows?",
+                    answers: ["msinfo32", "dxdiag", "perfmon", "All of the above"],
+                    correct: 3
+                },
+                400: {
+                    question: "What does the Event Viewer help you diagnose?",
+                    answers: ["Hardware problems only", "Software crashes only", "System events, errors, and warnings", "Network issues only"],
+                    correct: 2
+                },
+                500: {
+                    question: "What's the purpose of Windows PowerShell compared to Command Prompt?",
+                    answers: ["Same function, different name", "PowerShell is more powerful with object-based commands", "PowerShell is only for servers", "PowerShell is being discontinued"],
+                    correct: 1
+                }
+            }
+        };
+
+        function showQuestion(category, points) {
+            const question = questions[category][points];
+            if (!question) return;
+
+            document.getElementById('modalCategory').textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            document.getElementById('modalPoints').textContent = `$${points}`;
+            document.getElementById('questionText').textContent = question.question;
+            
+            const answersContainer = document.getElementById('answers');
+            answersContainer.innerHTML = '';
+            
+            question.answers.forEach((answer, index) => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = answer;
+                button.onclick = () => selectAnswer(index, question.correct, points, button);
+                answersContainer.appendChild(button);
+            });
+            
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function selectAnswer(selected, correct, points, buttonElement) {
+            const allButtons = document.querySelectorAll('.answer-btn');
+            
+            // Disable all buttons
+            allButtons.forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                if (btn === allButtons[correct]) {
+                    btn.classList.add('correct');
+                } else if (btn === buttonElement && selected !== correct) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            if (selected === correct) {
+                score += points;
+                document.getElementById('score').textContent = score;
+            }
+
+            questionsAnswered++;
+            
+            // Show continue button after a delay
+            setTimeout(() => {
+                if (questionsAnswered === totalQuestions) {
+                    showFinalScore();
+                }
+            }, 2000);
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function showFinalScore() {
+            document.getElementById('finalScoreValue').textContent = score;
+            document.getElementById('finalScore').style.display = 'block';
+            closeModal();
+        }
+
+        // Add click events to question tiles
+        document.addEventListener('DOMContentLoaded', function() {
+            const tiles = document.querySelectorAll('.question-tile');
+            
+            tiles.forEach(tile => {
+                tile.addEventListener('click', function() {
+                    if (this.classList.contains('answered')) return;
+                    
+                    const category = this.getAttribute('data-category');
+                    const points = parseInt(this.getAttribute('data-points'));
+                    
+                    showQuestion(category, points);
+                    this.classList.add('answered');
+                    this.style.pointerEvents = 'none';
+                });
+            });
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
