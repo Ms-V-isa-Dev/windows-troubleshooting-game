@@ -4,14 +4,14 @@
 An interactive Jeopardy-style quiz game for testing Windows troubleshooting and IT certification knowledge.
 
 ## Features
-- 50 questions covering Windows, Hardware, Software, Networking, Security, and more
+- 90 questions covering Windows, Hardware, Software, Networking, Security, and more
 - Single or Two-team gameplay modes
 - Custom team names
 - CompTIA A+, Network+, Security+, and Windows Admin certification topics
 
 ## How to Play
 1. Open `index.html` in any web browser
-2. Choose single or two-team mode
+2. Choose single, two, or three-team mode
 3. Enter team name(s)
 4. Click questions to answer and earn points!
 
