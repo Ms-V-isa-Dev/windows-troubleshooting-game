@@ -22,7 +22,7 @@
 <div class="team-input-group"><label>Team 1 Name:</label><input type="text" id="t1" placeholder="Team 1" maxlength="20"></div>
 <div class="team-input-group" id="inp2" style="display:none"><label>Team 2 Name:</label><input type="text" id="t2" placeholder="Team 2" maxlength="20"></div>
 <div class="team-input-group" id="inp3" style="display:none"><label>Team 3 Name:</label><input type="text" id="t3" placeholder="Team 3" maxlength="20"></div>
-<button class="start-game-btn" onclick="start()">Start Game</button>
+<button class="start-game-btn" onclick="startGame()">Start Game</button>
 </div>
 </div>
 <div class="score-board" id="sb" style="display:none">
@@ -40,22 +40,146 @@
 <h2 id="mp" style="margin-bottom:20px;color:#4CAF50"></h2>
 <p class="question-text" id="qt"></p>
 <div class="answers" id="ans"></div>
-<button class="close-btn" onclick="close()">Continue</button>
+<button class="close-btn" onclick="closeModal()">Continue</button>
 </div>
 </div>
 <script>
 let sc=[0,0,0],ans=0,mode=1,cur=1,tot=90;
-const snd=(f)=>{const a=new(window.AudioContext||window.webkitAudioContext)(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);if(f){[0,0.1,0.2].forEach((t,i)=>{const o2=a.createOscillator(),g2=a.createGain();o2.connect(g2);g2.connect(a.destination);o2.frequency.value=800+(i*200);o2.type='sine';g2.gain.setValueAtTime(0.3,a.currentTime+t);g2.gain.exponentialRampToValueAtTime(0.01,a.currentTime+t+0.3);o2.start(a.currentTime+t);o2.stop(a.currentTime+t+0.3)})}else{o.frequency.value=200;o.type='sawtooth';g.gain.setValueAtTime(0.3,a.currentTime);g.gain.exponentialRampToValueAtTime(0.01,a.currentTime+0.5);o.start();o.stop(a.currentTime+0.5)}};
+
+function playCorrect(){
+const a=new(window.AudioContext||window.webkitAudioContext)();
+[0,0.1,0.2].forEach((t,i)=>{
+const o=a.createOscillator(),g=a.createGain();
+o.connect(g);g.connect(a.destination);
+o.frequency.value=800+(i*200);o.type='sine';
+g.gain.setValueAtTime(0.3,a.currentTime+t);
+g.gain.exponentialRampToValueAtTime(0.01,a.currentTime+t+0.3);
+o.start(a.currentTime+t);o.stop(a.currentTime+t+0.3);
+});
+}
+
+function playWrong(){
+const a=new(window.AudioContext||window.webkitAudioContext)();
+const o=a.createOscillator(),g=a.createGain();
+o.connect(g);g.connect(a.destination);
+o.frequency.value=200;o.type='sawtooth';
+g.gain.setValueAtTime(0.3,a.currentTime);
+g.gain.exponentialRampToValueAtTime(0.01,a.currentTime+0.5);
+o.start();o.stop(a.currentTime+0.5);
+}
+
 const Q={'Basics':{100:{q:"What keyboard shortcut opens Task Manager?",a:["Ctrl+Alt+Del","Ctrl+Shift+Esc","Alt+Tab","Win+R"],c:1},200:{q:"What does BSOD stand for?",a:["Basic System Operating Device","Blue Screen of Death","Boot System Display","Binary System Data"],c:1},300:{q:"Which feature goes back to previous state?",a:["System Backup","System Restore","System Recovery","System Reset"],c:1},400:{q:"Default file system for Windows 10/11?",a:["FAT32","exFAT","NTFS","ReFS"],c:2},500:{q:"What does Registry store?",a:["User files","System configuration","Temporary files","Application data"],c:1}},'Hardware':{100:{q:"Computer won't turn on, check first?",a:["RAM","Hard drive","Power connection","Graphics card"],c:2},200:{q:"What does POST stand for?",a:["Power On Self Test","Program Operation Test","Primary OS Tool","Process Setup Test"],c:0},300:{q:"Tool to identify hardware problems?",a:["Control Panel","Device Manager","System Info","Performance Monitor"],c:1},400:{q:"Continuous beep indicates?",a:["Hard drive failure","RAM problem","CPU overheating","Graphics issue"],c:1},500:{q:"Safe CPU temperature range?",a:["20-40°C","40-70°C","70-90°C","90-110°C"],c:1}},'Software':{100:{q:"Program not responding, try first?",a:["Restart","End task","Reinstall","Run antivirus"],c:1},200:{q:"What does compatibility mode do?",a:["Faster","Runs older programs","Fixes crashes","Auto updates"],c:1},300:{q:"Fix corrupted system files?",a:["CHKDSK","SFC /scannow","DISM","All of the above"],c:3},400:{q:"Driver vs firmware?",a:["No difference","Drivers=software, firmware=hardware","Firmware newer","Drivers for printers"],c:1},500:{q:"What is DLL Hell?",a:["Virus","Hard drive corruption","Conflicting DLL files","Network problems"],c:2}},'Network':{100:{q:"Command to test connectivity?",a:["ipconfig","ping","netstat","tracert"],c:1},200:{q:"Limited connectivity means?",a:["Slow internet","No internet access","Weak signal","Router broken"],c:1},300:{q:"Home network IP range?",a:["192.168.x.x","10.0.x.x","172.16.x.x","All above"],c:3},400:{q:"DNS translates what?",a:["Files","Web addresses","Connections","Internet"],c:1},500:{q:"HTTPS port?",a:["80","443","21","25"],c:1}},'Tools':{100:{q:"Open Command Prompt as admin?",a:["Type cmd","Right-click Start","Win+X select","Both B and C"],c:3},200:{q:"msconfig opens?",a:["MS Configuration","System Configuration","Office Config","Mouse Settings"],c:1},300:{q:"Detailed system info tool?",a:["msinfo32","dxdiag","perfmon","All above"],c:3},400:{q:"Event Viewer diagnoses?",a:["Hardware only","Software only","Events/errors/warnings","Network only"],c:2},500:{q:"PowerShell vs Command Prompt?",a:["Same","More powerful","Servers only","Discontinued"],c:1}},'CompTIA':{100:{q:"USB 2.0 max cable length?",a:["3m","5m","10m","15m"],c:1},200:{q:"RAID fault tolerance 2 drives?",a:["RAID 0","RAID 1","RAID 5","RAID 10"],c:1},300:{q:"ECC in memory?",a:["Extended Cache","Error Correcting Code","Enhanced CPU Cache","External Connector"],c:1},400:{q:"DDR4 voltage?",a:["1.2V","1.35V","1.5V","3.3V"],c:0},500:{q:"Connects to CPU?",a:["Southbridge","Northbridge","PCH","I/O Hub"],c:2}},'WinAdmin':{100:{q:"Create AD user PowerShell?",a:["New-User","Add-ADUser","New-ADUser","Create-User"],c:2},200:{q:"Centralized authentication role?",a:["DNS","Active Directory","DHCP","File Services"],c:1},300:{q:"RDP default port?",a:["3389","5900","22","80"],c:0},400:{q:"Password complexity policy?",a:["Account Policies","Local Policies","Lockout Policy","User Rights"],c:0},500:{q:"SYSVOL contains?",a:["User profiles","GP templates/scripts","System logs","Application data"],c:1}},'Network+':{100:{q:"Router OSI layer?",a:["Layer 2","Layer 3","Layer 4","Layer 7"],c:1},200:{q:"/24 subnet mask?",a:["255.0.0.0","255.255.0.0","255.255.255.0","255.255.255.255"],c:2},300:{q:"Auto IP assignment protocol?",a:["DNS","DHCP","ARP","ICMP"],c:1},400:{q:"Cat6 max distance?",a:["100m","185m","500m","1000m"],c:0},500:{q:"Reserved VLAN ID?",a:["VLAN 1","VLAN 1002","VLAN 4095","All above"],c:3}},'Security':{100:{q:"Overwhelming system attack?",a:["Phishing","DDoS","MITM","SQL Injection"],c:1},200:{q:"Replaced WEP?",a:["WPA","WPA2","WPA3","All above"],c:3},300:{q:"MFA stands for?",a:["Multiple Factor","Multi-Factor Authentication","Managed Factor","Master File"],c:1},400:{q:"Broken hash algorithm?",a:["SHA-1","SHA-256","SHA-3","MD5"],c:3},500:{q:"Least privilege principle?",a:["Max permissions","Min required permissions","Same permissions","Auto inherited"],c:1}},'Advanced':{100:{q:"API stands for?",a:["Application Programming Interface","Advanced Integration","Automated Instruction","Application Interface"],c:0},200:{q:"Run multiple OS?",a:["Virtual Memory","Hyper-V","Windows Subsystem","Container Support"],c:1},300:{q:"TCP vs UDP?",a:["TCP faster","UDP connection-oriented","TCP reliable UDP fast","No difference"],c:2},400:{q:"Get system info cmdlet?",a:["Get-SystemInfo","Get-ComputerInfo","Get-WmiObject","Both B and C"],c:3},500:{q:"CI/CD stands for?",a:["Code Integration/Deployment","Continuous Integration/Deployment","Central Integration","Computer Integration"],c:1}},'Core2-A':{100:{q:"Configure startup programs?",a:["Services.msc","MSConfig","Regedit","Task Scheduler"],c:1},200:{q:"Show IP config?",a:["ipconfig","ifconfig","netstat","nslookup"],c:0},300:{q:"UAC purpose?",a:["Passwords","Prevent unauthorized changes","Disk encryption","Network security"],c:1},400:{q:"BitLocker edition?",a:["Home","Pro","Enterprise","Both B and C"],c:3},500:{q:"Safe Mode does?",a:["Increase performance","Load minimal drivers","Update drivers","Encrypt drive"],c:1}},'Core2-B':{100:{q:"Windows Update purpose?",a:["Install apps","Update system/security","Defragment","Clean temp files"],c:1},200:{q:"Remove malware tool?",a:["Disk Cleanup","Windows Defender","Defragmenter","Device Manager"],c:1},300:{q:"Firewall primarily?",a:["Speed internet","Block unauthorized access","Organize files","Update drivers"],c:1},400:{q:"Executable extension?",a:[".txt",".exe",".jpg",".pdf"],c:1},500:{q:"Defragmentation purpose?",a:["Delete files","Reorganize data","Create backups","Install updates"],c:1}},'Core2-C':{100:{q:"Ctrl+C does?",a:["Cut","Copy","Paste","Close"],c:1},200:{q:"Creates restore points?",a:["Backup/Restore","System Restore","File History","Shadow Copy"],c:1},300:{q:"VPN purpose?",a:["Speed internet","Secure connection","Store files","Manage passwords"],c:1},400:{q:"Secure browsing protocol?",a:["HTTP","FTP","HTTPS","SMTP"],c:2},500:{q:"DHCP assigns?",a:["Passwords","IP addresses","Usernames","Emails"],c:1}},'Core2-D':{100:{q:"Phishing is?",a:["Hardware failure","Fraudulent info attempt","Software update","Network protocol"],c:1},200:{q:"File sharing feature?",a:["Network Sharing","Windows Update","Device Manager","Disk Management"],c:0},300:{q:"NTFS permissions control?",a:["Speed","File/folder access","Defragment","Install programs"],c:1},400:{q:"Check disk errors?",a:["chkdsk","ipconfig","ping","sfc"],c:0},500:{q:"GPO stands for?",a:["General Program","Group Policy Object","Global Process","Generic Port"],c:1}},'Core2-E':{100:{q:"Task Manager purpose?",a:["Browse","Monitor processes","Edit documents","Play media"],c:1},200:{q:"Manage partitions?",a:["Device Manager","Disk Management","System Config","Services"],c:1},300:{q:"Zero-day vulnerability?",a:["Old bug","Unpatched security flaw","Maintenance","Planned update"],c:1},400:{q:"Backup changed files only?",a:["Full","Incremental","System image","Clone"],c:1},500:{q:"SSD stands for?",a:["System Storage","Solid State Drive","Software Security","Standard Storage"],c:1}},'Core2-F':{100:{q:"Malware is?",a:["System update","Malicious software","Hardware","Network protocol"],c:1},200:{q:"Encrypt entire drive?",a:["Windows Defender","BitLocker","Firewall","UAC"],c:1},300:{q:"Proxy server purpose?",a:["Store files","Intermediate requests","Update software","Manage passwords"],c:1},400:{q:"Send email protocol?",a:["HTTP","FTP","SMTP","IMAP"],c:2},500:{q:"BIOS stands for?",a:["Binary Input Output","Basic Input Output System","Boot Installation","Base Internet"],c:1}},'Core2-G':{100:{q:"Ransomware is?",a:["Free software","Encrypts for ransom","Antivirus","Operating system"],c:1},200:{q:"Auto file backups?",a:["System Restore","File History","Disk Cleanup","Defragmenter"],c:1},300:{q:"Two-factor auth?",a:["Two passwords","Second verification","Two accounts","Two computers"],c:1},400:{q:"Repair system files?",a:["chkdsk","sfc /scannow","ipconfig","ping"],c:1},500:{q:"Remote Desktop purpose?",a:["Browse","Control remotely","Share files","Send emails"],c:1}},'Core2-H':{100:{q:"RAM stands for?",a:["Read Access","Random Access Memory","Rapid Application","Remote Access"],c:1},200:{q:"HTTP port?",a:["21","25","80","443"],c:2},300:{q:"Botnet is?",a:["Infected computers network","Router type","Antivirus","Email protocol"],c:0},400:{q:"Flush DNS cache?",a:["ipconfig /flushdns","ping","netstat","tracert"],c:0},500:{q:"RAID 5 purpose?",a:["Speed only","Fault tolerance parity","Mirroring","No redundancy"],c:1}}};
-function setMode(m){mode=m;['btn1','btn2','btn3'].forEach((id,i)=>document.getElementById(id).classList.toggle('selected',i+1===m));document.getElementById('inputs').style.display='block';document.getElementById('inp2').style.display=m>=2?'block':'none';document.getElementById('inp3').style.display=m===3?'block':'none'}
-function start(){['n1','n2','n3'].forEach((id,i)=>document.getElementById(id).textContent=document.getElementById(['t1','t2','t3'][i]).value||`Team ${i+1}`);document.getElementById('teamSetup').style.display='none';document.getElementById('sb').style.display='flex';document.getElementById('board').style.display='grid';if(mode>=2){document.getElementById('ts2').style.display='flex';document.getElementById('turn').style.display='flex';if(mode===3)document.getElementById('ts3').style.display='flex';upd()}gen()}
-function gen(){let h='';Object.keys(Q).forEach(cat=>{h+=`<div class="category">${cat}</div>`;});Object.keys(Q).forEach(cat=>{[100,200,300,400,500].forEach(pts=>{h+=`<div class="question-tile" data-c="${cat}" data-p="${pts}">$${pts}</div>`;})});document.getElementById('board').innerHTML=h;document.querySelectorAll('.question-tile').forEach(t=>t.onclick=function(){if(!this.classList.contains('answered')){show(this.dataset.c,this.dataset.p);this.classList.add('answered')}})}
-function upd(){document.getElementById('ti').textContent=document.getElementById(['n1','n2','n3'][cur-1]).textContent+"'s Turn"}
-function show(cat,pts){const q=Q[cat][pts];document.getElementById('mc').textContent=cat;document.getElementById('mp').textContent='$'+pts;document.getElementById('qt').textContent=q.q;const ac=document.getElementById('ans');ac.innerHTML='';q.a.forEach((a,i)=>{const b=document.createElement('button');b.className='answer-btn';b.textContent=a;b.onclick=()=>sel(i,q.c,pts,b);ac.appendChild(b)});document.getElementById('modal').style.display='block'}
-function sel(s,c,p,btn){const all=document.querySelectorAll('.answer-btn');all.forEach((b,i)=>{b.style.pointerEvents='none';if(i===c)b.classList.add('correct');else if(b===btn&&s!==c)b.classList.add('incorrect')});if(s===c){snd(1);sc[cur-1]+=parseInt(p);document.getElementById(['s1','s2','s3'][cur-1]).textContent=sc[cur-1]}else{snd(0);if(mode>1){cur=cur>=mode?1:cur+1;upd()}}ans++;setTimeout(()=>{if(ans===tot)fin()},2000)}
-function close(){document.getElementById('modal').style.display='none'}
-function fin(){let txt;if(mode===1){txt='$'+sc[0]}else{const names=['n1','n2','n3'].slice(0,mode).map(id=>document.getElementById(id).textContent);const max=Math.max(...sc.slice(0,mode));const winners=names.filter((n,i)=>sc[i]===max);txt=winners.length>1?`Tie! $${max}`:winners[0]+` wins! $${max}`}document.getElementById('fv').innerHTML=txt;document.getElementById('final').style.display='block';close()}
-document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')close()}
+
+function setMode(m){
+mode=m;
+['btn1','btn2','btn3'].forEach((id,i)=>document.getElementById(id).classList.toggle('selected',i+1===m));
+document.getElementById('inputs').style.display='block';
+document.getElementById('inp2').style.display=m>=2?'block':'none';
+document.getElementById('inp3').style.display=m===3?'block':'none';
+}
+
+function startGame(){
+['n1','n2','n3'].forEach((id,i)=>document.getElementById(id).textContent=document.getElementById(['t1','t2','t3'][i]).value||'Team '+(i+1));
+document.getElementById('teamSetup').style.display='none';
+document.getElementById('sb').style.display='flex';
+document.getElementById('board').style.display='grid';
+if(mode>=2){
+document.getElementById('ts2').style.display='flex';
+document.getElementById('turn').style.display='flex';
+if(mode===3)document.getElementById('ts3').style.display='flex';
+updateTurn();
+}
+generateBoard();
+}
+
+function generateBoard(){
+let h='';
+Object.keys(Q).forEach(cat=>{h+=`<div class="category">${cat}</div>`;});
+Object.keys(Q).forEach(cat=>{
+[100,200,300,400,500].forEach(pts=>{
+h+=`<div class="question-tile" data-c="${cat}" data-p="${pts}">$${pts}</div>`;
+});
+});
+document.getElementById('board').innerHTML=h;
+document.querySelectorAll('.question-tile').forEach(t=>t.onclick=function(){
+if(!this.classList.contains('answered')){
+showQuestion(this.dataset.c,this.dataset.p);
+this.classList.add('answered');
+}
+});
+}
+
+function updateTurn(){
+document.getElementById('ti').textContent=document.getElementById(['n1','n2','n3'][cur-1]).textContent+"'s Turn";
+}
+
+function showQuestion(cat,pts){
+const q=Q[cat][pts];
+document.getElementById('mc').textContent=cat;
+document.getElementById('mp').textContent='$'+pts;
+document.getElementById('qt').textContent=q.q;
+const ac=document.getElementById('ans');
+ac.innerHTML='';
+q.a.forEach((a,i)=>{
+const b=document.createElement('button');
+b.className='answer-btn';
+b.textContent=a;
+b.onclick=()=>selectAnswer(i,q.c,pts,b);
+ac.appendChild(b);
+});
+document.getElementById('modal').style.display='block';
+}
+
+function selectAnswer(s,c,p,btn){
+const all=document.querySelectorAll('.answer-btn');
+all.forEach((b,i)=>{
+b.style.pointerEvents='none';
+if(i===c)b.classList.add('correct');
+else if(b===btn&&s!==c)b.classList.add('incorrect');
+});
+if(s===c){
+playCorrect();
+sc[cur-1]+=parseInt(p);
+document.getElementById(['s1','s2','s3'][cur-1]).textContent=sc[cur-1];
+}else{
+playWrong();
+if(mode>1){
+cur=cur>=mode?1:cur+1;
+updateTurn();
+}
+}
+ans++;
+setTimeout(()=>{if(ans===tot)showFinal()},2000);
+}
+
+function closeModal(){
+document.getElementById('modal').style.display='none';
+}
+
+function showFinal(){
+let txt;
+if(mode===1){
+txt='Final Score: $'+sc[0];
+}else{
+const names=['n1','n2','n3'].slice(0,mode).map(id=>document.getElementById(id).textContent);
+const max=Math.max(...sc.slice(0,mode));
+const winners=names.filter((n,i)=>sc[i]===max);
+if(winners.length>1){
+txt='It is a Tie! $'+max;
+}else{
+txt=winners[0]+' wins with $'+max+'!';
+}
+}
+document.getElementById('fv').innerHTML=txt;
+document.getElementById('final').style.display='block';
+closeModal();
+}
+
+document.getElementById('modal').onclick=function(e){
+if(e.target.id==='modal')closeModal();
+};
 </script>
+</body>
+</html>
 </body>
 </html>
