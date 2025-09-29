@@ -5,7 +5,7 @@ An interactive Jeopardy-style quiz game for testing Windows troubleshooting and 
 
 ## Features
 - 90 questions covering Windows, Hardware, Software, Networking, Security, and more
-- Single or Two-team gameplay modes
+- Single, two, or three-team mode
 - Custom team names
 - CompTIA A+, Network+, Security+, and Windows Admin certification topics
 
