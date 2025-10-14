@@ -18,12 +18,14 @@
 <button class="team-mode-btn" id="btn2" onclick="setMode(2)">Two Teams</button>
 <button class="team-mode-btn" id="btn3" onclick="setMode(3)">Three Teams</button>
 <button class="team-mode-btn" id="btn4" onclick="setMode(4)">Four Teams</button>
+<button class="team-mode-btn" id="btn5" onclick="setMode(5)">Five Teams</button>
 </div>
 <div class="team-inputs" id="inputs" style="display:none">
 <div class="team-input-group"><label>Team 1 Name:</label><input type="text" id="t1" placeholder="Team 1" maxlength="20"></div>
 <div class="team-input-group" id="inp2" style="display:none"><label>Team 2 Name:</label><input type="text" id="t2" placeholder="Team 2" maxlength="20"></div>
 <div class="team-input-group" id="inp3" style="display:none"><label>Team 3 Name:</label><input type="text" id="t3" placeholder="Team 3" maxlength="20"></div>
 <div class="team-input-group" id="inp4" style="display:none"><label>Team 4 Name:</label><input type="text" id="t4" placeholder="Team 4" maxlength="20"></div>
+<div class="team-input-group" id="inp5" style="display:none"><label>Team 5 Name:</label><input type="text" id="t5" placeholder="Team 5" maxlength="20"></div>
 <button class="start-game-btn" onclick="startGame()">Start Game</button>
 </div>
 </div>
@@ -33,6 +35,7 @@
 <div class="team-score" id="ts2" style="display:none"><span class="team-name" id="n2">Team 2</span><div class="score">$<span id="s2">0</span></div></div>
 <div class="team-score" id="ts3" style="display:none"><span class="team-name" id="n3">Team 3</span><div class="score">$<span id="s3">0</span></div></div>
 <div class="team-score" id="ts4" style="display:none"><span class="team-name" id="n4">Team 4</span><div class="score">$<span id="s4">0</span></div></div>
+<div class="team-score" id="ts5" style="display:none"><span class="team-name" id="n5">Team 5</span><div class="score">$<span id="s5">0</span></div></div>
 </div>
 <div class="game-board" id="board" style="display:none"></div>
 <div class="final-score" id="final" style="display:none"><h2>🎉 Game Complete! 🎉</h2><p style="font-size:1.5rem;margin-top:20px" id="fv"></p></div>
@@ -47,7 +50,7 @@
 </div>
 </div>
 <script>
-let sc=[0,0,0,0],ans=0,mode=1,cur=1,tot=90;
+let sc=[0,0,0,0,0],ans=0,mode=1,cur=1,tot=90;
 
 function playCorrect(){
 const a=new(window.AudioContext||window.webkitAudioContext)();
@@ -75,15 +78,16 @@ const Q={'Basics':{100:{q:"What keyboard shortcut opens Task Manager?",a:["Ctrl+
 
 function setMode(m){
 mode=m;
-['btn1','btn2','btn3','btn4'].forEach((id,i)=>document.getElementById(id).classList.toggle('selected',i+1===m));
+['btn1','btn2','btn3','btn4','btn5'].forEach((id,i)=>document.getElementById(id).classList.toggle('selected',i+1===m));
 document.getElementById('inputs').style.display='block';
 document.getElementById('inp2').style.display=m>=2?'block':'none';
 document.getElementById('inp3').style.display=m>=3?'block':'none';
-document.getElementById('inp4').style.display=m===4?'block':'none';
+document.getElementById('inp4').style.display=m>=4?'block':'none';
+document.getElementById('inp5').style.display=m===5?'block':'none';
 }
 
 function startGame(){
-['n1','n2','n3','n4'].forEach((id,i)=>document.getElementById(id).textContent=document.getElementById(['t1','t2','t3','t4'][i]).value||'Team '+(i+1));
+['n1','n2','n3','n4','n5'].forEach((id,i)=>document.getElementById(id).textContent=document.getElementById(['t1','t2','t3','t4','t5'][i]).value||'Team '+(i+1));
 document.getElementById('teamSetup').style.display='none';
 document.getElementById('sb').style.display='flex';
 document.getElementById('board').style.display='grid';
@@ -91,7 +95,8 @@ if(mode>=2){
 document.getElementById('ts2').style.display='flex';
 document.getElementById('turn').style.display='flex';
 if(mode>=3)document.getElementById('ts3').style.display='flex';
-if(mode===4)document.getElementById('ts4').style.display='flex';
+if(mode>=4)document.getElementById('ts4').style.display='flex';
+if(mode===5)document.getElementById('ts5').style.display='flex';
 updateTurn();
 }
 generateBoard();
@@ -115,7 +120,7 @@ this.classList.add('answered');
 }
 
 function updateTurn(){
-document.getElementById('ti').textContent=document.getElementById(['n1','n2','n3','n4'][cur-1]).textContent+"'s Turn";
+document.getElementById('ti').textContent=document.getElementById(['n1','n2','n3','n4','n5'][cur-1]).textContent+"'s Turn";
 }
 
 function showQuestion(cat,pts){
@@ -145,7 +150,7 @@ else if(b===btn&&s!==c)b.classList.add('incorrect');
 if(s===c){
 playCorrect();
 sc[cur-1]+=parseInt(p);
-document.getElementById(['s1','s2','s3','s4'][cur-1]).textContent=sc[cur-1];
+document.getElementById(['s1','s2','s3','s4','s5'][cur-1]).textContent=sc[cur-1];
 }else{
 playWrong();
 if(mode>1){
@@ -166,7 +171,7 @@ let txt;
 if(mode===1){
 txt='Final Score: $'+sc[0];
 }else{
-const names=['n1','n2','n3','n4'].slice(0,mode).map(id=>document.getElementById(id).textContent);
+const names=['n1','n2','n3','n4','n5'].slice(0,mode).map(id=>document.getElementById(id).textContent);
 const max=Math.max(...sc.slice(0,mode));
 const winners=names.filter((n,i)=>sc[i]===max);
 if(winners.length>1){
@@ -183,9 +188,6 @@ closeModal();
 document.getElementById('modal').onclick=function(e){
 if(e.target.id==='modal')closeModal();
 };
-</script>
-</body>
-</html>
 </script>
 </body>
 </html>
